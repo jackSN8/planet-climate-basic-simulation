@@ -9,7 +9,7 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
 
-		void setupTexture();
+		
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -22,9 +22,13 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+		
+		void setupTexture();
+		void generateHeightMap();
 		void updateCloudTexture();
 
 
+		float calculateSeaVolume(float inpSeaLevel);
 		int From2DTo1D(ofColor *inp);
 		float calculateSeaLevel(float temp);
 		ofColor mergeColor(ofColor inp1, ofColor inp2);
