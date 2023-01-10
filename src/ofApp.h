@@ -26,20 +26,21 @@ class ofApp : public ofBaseApp{
 		void setupTexture();
 		void generateHeightMap();
 		void updateCloudTexture();
+		void redrawTexture();
 
+		//--hydrological functions
+		void hydrologicalCycle();
+		void evaporationCycle();
+		void updateSeaLevel();
+		void precipiationAndMelt();
+		void iceMelt();
+		//--
 
 		float calculateSeaVolume(float inpSeaLevel);
 		int From2DTo1D(ofColor *inp);
 		float calculateSeaLevel(float temp);
 		ofColor mergeColor(ofColor inp1, ofColor inp2);
 
-		ofSpherePrimitive sphere;
 		
-		ofLight light;
-		ofTexture texture;
-		
-		ofEasyCam camera;
-		ofPixels pix;
-
 
 };
