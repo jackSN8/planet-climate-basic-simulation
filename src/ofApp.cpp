@@ -8,9 +8,7 @@ ofTexture texture;
 ofEasyCam camera;
 ofPixels pix;
 
-
-
-
+bool paused = true;
 
 const int groundMapWidth = 400;//Texture x width
 const int groundMapHeight = 250;//Texture y width
@@ -38,7 +36,7 @@ float seaVolumes[seaHeightResolution];//Extremely dumb variable
 float t = 0;//time
 
 //Factors influencing the planet														
-const float avFlux = 10;// -- solar flux, normalized so that planet with earthlike
+float avFlux = 10;// -- solar flux, normalized so that planet with earthlike
 //atmosphere has an average surface temperature = avFlux in celcius
 const float maxGreenTemp = 35;
 
@@ -132,32 +130,97 @@ void ofApp::setup()
 	texture.loadData(pix);
 	atmoTex.loadData(atmoPixs);
 	//ofLoadImage(texture, "earthmap.jpg");
+	gui.setup();
+	gui.add(testVar.setup("temp", 10, -20, 60));
+
+
+	sphere.setPosition(ofGetWidth() * 0.5, ofGetHeight() * .5, 0);
+	atmosphere.setPosition(ofGetWidth() * 0.5, ofGetHeight() * .5, 0);
+
+
+	camera.begin();
+	camera.roll(180);
+	camera.end();
+
 }
 
 
 
 //--------------------------------------------------------------
+/// <summary>
+/// /Sorry terrible commenting on update as was rewritten while very sleepy
+/// to be improved vastly
+/// </summary>
 void ofApp::update()
 {
-	t+=0.003;
-	hydrologicalCycle();
-	redrawTexture();
-	cout << "Sea level is " << seaLevel << "\n";
+	if (!paused)
+	{
+		t += 0.003;
+		hydrologicalCycle();
+		redrawTexture();
+		//cout << "Sea level is " << seaLevel << "\n";
+
+		//Gui updates to variables
+		if (testVar != avFlux)
+		{
+			avFlux = testVar;
+			generateHeightMap();
+		}
+	}	
+	if (paused)
+	{
+		if (testVar != avFlux)
+		{
+			avFlux = testVar;
+			generateHeightMap();
+			setupTexture();
+			texture.loadData(pix);
+		}
+	}
 }
 
 //--------------------------------------------------------------
+
+/// <summary>
+/// /Sorry terrible commenting on draw as was rewritten while very sleepy
+/// to be improved vastly
+/// </summary>
 void ofApp::draw()
 {
-	camera.begin();
+	if (paused)
+	{
+		ofEnableDepthTest();//Must go first
+			
+		sphere.setPosition(ofGetWidth() * 0.5, ofGetHeight() * .5, 0);
+		atmosphere.setPosition(ofGetWidth() * 0.5, ofGetHeight() * .5, 0);
+		
+		texture.bind();
+		sphere.draw();
+		texture.unbind();
+		atmoTex.bind();
+		atmosphere.draw();
+		atmoTex.unbind();
+		ofDisableDepthTest();
+		gui.draw();
+	}
+	else
+	{
+		ofEnableDepthTest();//Must go first
+		
+		sphere.setPosition(0,0, 0);
+		atmosphere.setPosition(0,0, 0);
+		camera.begin();
+		ofScale(-1, 1, 1);
 
-	//sphere.setPosition(ofGetWidth() * 0.5, ofGetHeight() * .5, 0);
-	texture.bind();
-	sphere.draw();
-	texture.unbind();
-	atmoTex.bind();
-	atmosphere.draw();
-	atmoTex.unbind();
-	
+		texture.bind();
+		sphere.draw();
+		texture.unbind();
+		atmoTex.bind();
+		atmosphere.draw();
+		atmoTex.unbind();
+		camera.end();
+	}
+
 }
 
 void ofApp::generateHeightMap()
@@ -431,8 +494,13 @@ void ofApp::precipiationAndMelt()
 			//flow back into oceans
 			//if warm, chance is high,
 			//if snow piles up too much, chance is high?
-			float meltProb = tanh(-snowProb[i][j] + 1);
-
+			//depricated//float meltProb = tanh(-snowProb[i][j] + 1);
+			if (globalTempMap[i][j] > 0)
+			{
+				float meltedMass = snowQuantity[i][j];
+				liquidWaterMass += meltedMass;
+				snowQuantity[i][j] = 0;
+			}
 			
 		}
 	}
@@ -461,7 +529,7 @@ void ofApp::updateSeaLevel()
 		}
 	}
 	redrawTexture();
-	cout << "Sea Level is " << seaLevel << "\n";
+	//cout << "Sea Level is " << seaLevel << "\n";
 }
 
 void ofApp::updateCloudTexture()
@@ -550,13 +618,19 @@ ofColor ofApp::mergeColor(ofColor inp1, ofColor inp2)
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-
+void ofApp::keyPressed(int key)
+{
+	
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-
+void ofApp::keyReleased(int key)
+{
+	if (key == 112)
+	{
+		paused = !paused;
+		cout << paused;
+	}
 }
 
 //--------------------------------------------------------------

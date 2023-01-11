@@ -1,14 +1,22 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGui.h"
+
+
 
 class ofApp : public ofBaseApp{
 
 	public:
+		//gui variables
+		ofxFloatSlider testVar;
+		ofxPanel gui;
+
+
 		void setup();
 		void update();
 		void draw();
-
+		
 		
 
 		void keyPressed(int key);
